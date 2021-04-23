@@ -5,15 +5,20 @@
 </template>
 
 <script>
+<<<<<<< HEAD
   import { onMounted, ref, toRefs } from 'vue'
   import { config } from '../config'
 
+=======
+  import { onMounted, ref } from 'vue'
+>>>>>>> ceb93bdbffa886f7e9aafd11dbcb816ed9a62188
   export default {
     props: {
       columns: Array
     },
     setup (props) {
       const canvas = ref(null)
+<<<<<<< HEAD
       let { columns } = toRefs(props)
 
       let paint = (canvas, cols) => {
@@ -53,6 +58,11 @@
         paint(ctx, columns.value)
       })
 
+=======
+      onMounted(() => {
+        console.log('canvas.value: ', canvas.value)
+      })
+>>>>>>> ceb93bdbffa886f7e9aafd11dbcb816ed9a62188
       return {
         canvas
       }
