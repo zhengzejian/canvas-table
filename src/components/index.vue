@@ -1,27 +1,38 @@
 <template>
   <div>
     <canvas ref="canvas"></canvas>
+    <canvas ref="textCanvas"></canvas>
   </div>
 </template>
 
-<script>
-  import { onMounted, ref, toRefs } from 'vue'
-  import { config } from '../config'
+<script lang="ts">
+  import { onMounted, ref, toRefs } from "vue"
+  import { config } from "../config"
+  import { paintHeader } from "../utils/paint"
+
+  let initCanvas = (canvas: CanvasRenderingContext2D, canvasEle: HTMLCanvasElement) => {
+    let devicePixelRatio = window.devicePixelRatio
+    canvasEle.width = Math.round(config.width * devicePixelRatio)
+    canvasEle.height = Math.round(config.height * devicePixelRatio)
+    canvasEle.style.width = config.width + 'px'
+    canvasEle.style.height = config.height + 'px'
+    canvas.scale(devicePixelRatio, devicePixelRatio)
+  }
 
   export default {
     props: {
-      columns: Array
+      columns: Array,
     },
-    setup (props) {
+    setup(props) {
       const canvas = ref(null)
+      const textCanvas = ref(null)
       let { columns } = toRefs(props)
 
-      let paint = (canvas, cols) => {
-        console.log('canvas: ', canvas)
-        canvas.width = config.width
-        canvas.height = config.height
+      let paint = (canvas: CanvasRenderingContext2D, cols, canvasEle: HTMLCanvasElement) => {
+
+
         cols.reduce((sums, current) => {
-          console.log('currentcurrentcurrent: ', current)
+          console.log("currentcurrentcurrent: ", current)
           if (!sums) paintVerticalLine(canvas, 0 + 0.5, config.rowHeight)
           let x = sums + current.width
           paintVerticalLine(canvas, x + 0.5, config.rowHeight)
@@ -37,8 +48,7 @@
         ctx.lineTo(x, y)
         ctx.stroke()
       }
-      let paintHorizontalLine = () => {
-
+      let paintHorizontalLine = (ctx) => {
         ctx.beginPath()
         ctx.lineWidth = 1
         ctx.strokeStyle = config.lineColor
@@ -47,16 +57,21 @@
         ctx.stroke()
       }
 
-
       onMounted(() => {
-        let ctx = canvas.value.getContext('2d')
-        paint(ctx, columns.value)
+        let canvasEle = canvas.value as HTMLCanvasElement
+        let textCanvasEle = textCanvas.value as HTMLCanvasElement
+        let ctx = canvasEle.getContext("2d") as CanvasRenderingContext2D
+        let textCtx = textCanvasEle.getContext("2d")
+        initCanvas(ctx, canvasEle)
+        paint(ctx, columns.value, canvasEle)
+        paintHeader(ctx, columns.value)
       })
 
       return {
-        canvas
+        canvas,
+        textCanvas
       }
-    }
+    },
   }
 </script>
 
