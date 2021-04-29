@@ -1,11 +1,13 @@
 <template>
   <div>
-    <canvas-table :columns="columns"></canvas-table>
+    <canvas-table :columns="columns"
+                  :data="data"></canvas-table>
   </div>
 </template>
 
 <script>
   import { reactive } from 'vue'
+  import mockData from './mock/data'
   const cols = [
     {
       label: '第一行',
@@ -32,8 +34,10 @@
     setup () {
       // let obj = reactive({ text: 'hello world!' })
       let columns = reactive(cols)
+      let data = reactive(mockData)
       return {
-        columns
+        columns,
+        data
       }
     }
   }

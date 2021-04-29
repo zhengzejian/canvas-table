@@ -11,7 +11,7 @@ interface Config {
 }
 const config: Config = {
     width: 1200,
-    height: 300,
+    height: 1200,
     lineColor: '#d2d2d6',
     headerColor: '#ebecf0',
     headerHeight: 32,

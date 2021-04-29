@@ -3,12 +3,17 @@ import { state } from '../core/store'
 import { Column } from '../types'
 import config from '../config'
 
-export function paint(canvas: Ref<HTMLCanvasElement>, columns: Ref<Column[]>): void {
-    paintHeader(canvas, columns)
+export function paint(): void {
+    let { $data } = state
+    paintHeader()
+    if ($data.length) {
+        paintBody()
+    }
+
 }
 
 // draw header
-function paintHeader(canvas: Ref<HTMLCanvasElement>, columns: Ref<Column[]>): void {
+function paintHeader(): void {
 
     let { width, headerHeight, headerColor, cellPaddingWidth, font, lineColor } = config
     let canvasCtx = state.canvasCtx as CanvasRenderingContext2D
@@ -38,4 +43,34 @@ function paintHeader(canvas: Ref<HTMLCanvasElement>, columns: Ref<Column[]>): vo
         canvasCtx.fillStyle = '#000'
         canvasCtx.fillText(label, x + cellPaddingWidth, textY)
     })
+}
+
+function paintBody(): void {
+    let canvasCtx = state.canvasCtx as CanvasRenderingContext2D
+    let { $data, $columns, totalWidth, totalHeight } = state
+    let { rowHeight, headerHeight, height, lineColor } = config
+    let bodyHeight: number = height - headerHeight
+    let dataHeight: number = $data.length * rowHeight
+    let actualHeight: number = dataHeight > bodyHeight ? bodyHeight : dataHeight
+
+    canvasCtx.beginPath()
+    canvasCtx.strokeStyle = lineColor
+    canvasCtx.strokeRect(0 + 0.5, headerHeight, totalWidth, actualHeight - 0.5)
+
+    $data.forEach((item, i) => {
+        canvasCtx.beginPath()
+        canvasCtx.strokeStyle = lineColor
+        canvasCtx.moveTo(0, item.y)
+        canvasCtx.lineTo(totalWidth, item.y)
+        canvasCtx.stroke()
+    })
+    $columns.forEach((column, i) => {
+        canvasCtx.beginPath()
+        canvasCtx.strokeStyle = lineColor
+        canvasCtx.moveTo(column.x, 0)
+        canvasCtx.lineTo(column.x, totalHeight)
+        canvasCtx.stroke()
+    })
+
+
 }

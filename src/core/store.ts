@@ -1,12 +1,16 @@
 import { reactive, Ref } from 'vue'
 import { Column, $columns } from '../types'
 
+export type singleData = { y: number }
+
 interface State {
     canvasEle: HTMLCanvasElement | null;
     canvasCtx: CanvasRenderingContext2D | null;
     columns: Column[];
     $columns: $columns[];
+    $data: singleData[],
     totalWidth: number;
+    totalHeight: number;
 }
 
 export let state = reactive<State>({
@@ -14,7 +18,9 @@ export let state = reactive<State>({
     canvasCtx: null,
     columns: [],
     $columns: [],
-    totalWidth: 0
+    $data: [],
+    totalWidth: 0,
+    totalHeight: 0
 })
 
 export function setCanvas(canvas: Ref<HTMLCanvasElement>): void {
@@ -28,4 +34,12 @@ export function setColumns(data: $columns[]): void {
 
 export function setTotalWidth(width: number): void {
     state.totalWidth = width
+}
+
+export function setTotalHeight(height: number): void {
+    state.totalHeight = height
+}
+
+export function setData(data: singleData[]) {
+    state.$data = data
 }
