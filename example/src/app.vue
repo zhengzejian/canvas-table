@@ -16,6 +16,16 @@
       label: '第二行',
       key: 'second',
       width: 100
+    },
+    {
+      label: '第三行',
+      key: 'second',
+      width: 100
+    },
+    {
+      label: '第三行',
+      key: 'second',
+      width: 100
     }
   ]
   export default {

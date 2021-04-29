@@ -1,5 +1,7 @@
-export interface column {
+export interface Column {
     width: number;
     label: string;
-    x?: number;
+    key: string;
 }
+
+export type $columns = Column & { x: number }
