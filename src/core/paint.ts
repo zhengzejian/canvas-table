@@ -48,7 +48,7 @@ function paintHeader(): void {
 function paintBody(): void {
     let canvasCtx = state.canvasCtx as CanvasRenderingContext2D
     let { $data, $columns, totalWidth, totalHeight } = state
-    let { rowHeight, headerHeight, height, lineColor } = config
+    let { rowHeight, headerHeight, height, lineColor, font, cellPaddingWidth } = config
     let bodyHeight: number = height - headerHeight
     let dataHeight: number = $data.length * rowHeight
     let actualHeight: number = dataHeight > bodyHeight ? bodyHeight : dataHeight
@@ -63,14 +63,20 @@ function paintBody(): void {
         canvasCtx.moveTo(0, item.y)
         canvasCtx.lineTo(totalWidth, item.y)
         canvasCtx.stroke()
-    })
-    $columns.forEach((column, i) => {
-        canvasCtx.beginPath()
-        canvasCtx.strokeStyle = lineColor
-        canvasCtx.moveTo(column.x, 0)
-        canvasCtx.lineTo(column.x, totalHeight)
-        canvasCtx.stroke()
-    })
 
-
+        
+        $columns.forEach(column => {
+            let { key, x } = column
+            // draw vertival line
+            canvasCtx.beginPath()
+            canvasCtx.strokeStyle = lineColor
+            canvasCtx.moveTo(column.x, 0)
+            canvasCtx.lineTo(column.x, totalHeight)
+            canvasCtx.stroke()
+            // draw text
+            canvasCtx.beginPath()
+            canvasCtx.font = `${font}`
+            canvasCtx.fillText(item[key], x + cellPaddingWidth, item.y - 7)
+        })
+    })
 }
