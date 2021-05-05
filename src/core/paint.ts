@@ -1,7 +1,6 @@
-import { Ref, watch } from 'vue'
 import { state } from '../core/store'
-import { Column } from '../types'
 import config from '../config'
+import { textOverflow } from '../utils'
 
 export function paint(): void {
     let { $data } = state
@@ -29,8 +28,9 @@ function paintHeader(): void {
     canvasCtx.strokeRect(0.5, 0.5, canvasWidth, headerHeight)
 
     $columns.forEach(column => {
-        let { x, label } = column
+        let { x, label, width } = column
         let textY = (13 + headerHeight) / 2
+        let text = textOverflow(label, width).text
         canvasCtx.beginPath()
         canvasCtx.lineWidth = 1
         canvasCtx.strokeStyle = lineColor
@@ -41,7 +41,7 @@ function paintHeader(): void {
         canvasCtx.beginPath()
         canvasCtx.font = `${font}`
         canvasCtx.fillStyle = '#000'
-        canvasCtx.fillText(label, x + cellPaddingWidth, textY)
+        canvasCtx.fillText(text, x + cellPaddingWidth, textY)
     })
 }
 
@@ -64,10 +64,11 @@ function paintBody(): void {
         canvasCtx.lineTo(totalWidth, item.y)
         canvasCtx.stroke()
 
-        
+
         $columns.forEach(column => {
             let { key, x } = column
-            // draw vertival line
+            let text = textOverflow(item[key], column.width).text
+            // draw vertical line
             canvasCtx.beginPath()
             canvasCtx.strokeStyle = lineColor
             canvasCtx.moveTo(column.x, 0)
@@ -76,7 +77,7 @@ function paintBody(): void {
             // draw text
             canvasCtx.beginPath()
             canvasCtx.font = `${font}`
-            canvasCtx.fillText(item[key], x + cellPaddingWidth, item.y - 7)
+            canvasCtx.fillText(text, x + cellPaddingWidth, item.y - 7)
         })
     })
 }

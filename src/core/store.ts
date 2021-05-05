@@ -1,7 +1,10 @@
 import { reactive, Ref } from 'vue'
 import { Column, $columns } from '../types'
 
-export type singleData = { y: number }
+export type singleData = {
+    y: number;
+    [index: string]: any;
+}
 
 interface State {
     canvasEle: HTMLCanvasElement | null;

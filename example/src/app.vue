@@ -15,14 +15,14 @@
       width: 100
     },
     {
-      label: '第二行',
+      label: '第二行第二行第二行第二行第二行',
       key: 'second',
-      width: 100
+      width: 125
     },
     {
       label: '第三行',
       key: 'second',
-      width: 100
+      width: 120
     },
     {
       label: '第三行',

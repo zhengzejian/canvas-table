@@ -1,6 +1,6 @@
 let obj = {
-    first: '香蕉',
-    second: '苹果🍎',
+    first: '香蕉香蕉香蕉香蕉',
+    second: '苹果🍎🍎🍎🍎🍎🍎',
     third: '芒果🥭'
 }
 let data = Array.from({ length: 10 }).map((item, i) => {

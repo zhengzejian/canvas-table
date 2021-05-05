@@ -8,6 +8,7 @@ interface Config {
     rowHeight: number;
     cellPaddingWidth: number;
     font: string;
+    fontSize: number;
 }
 const config: Config = {
     width: 1200,
@@ -17,6 +18,7 @@ const config: Config = {
     headerHeight: 32,
     rowHeight: 28,
     cellPaddingWidth: 6,
-    font: 'bold 13px Microsoft YaHei'
+    font: 'bold 13px Microsoft YaHei',
+    fontSize: 13
 }
 export default config
