@@ -1,7 +1,7 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
-import typescript from 'rollup-plugin-typescript';
-import pkg from './package.json';
+import typescript from 'rollup-plugin-typescript2';
+const pkg = require('./package.json');
 
 export default {
     input: 'src/index.ts', // 打包入口
