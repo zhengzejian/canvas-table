@@ -1,6 +1,8 @@
 <template>
-  <div>
+  <div class="canvas-table-wrapper">
     <canvas ref="canvasRef"></canvas>
+    <div class="divide-line"
+         ref="divideLineRef"></div>
   </div>
 </template>
 
@@ -27,7 +29,7 @@
     },
     setup(props) {
       const canvasRef = ref<HTMLCanvasElement | null>(null)
-
+      const divideLineRef = ref<HTMLDivElement | null>(null)
       let { rowHeight, headerHeight } = config
       let { columns, data } = toRefs(props)
       let _columns: $columns[] = flatData(columns)
@@ -53,11 +55,22 @@
       })
 
       return {
-        canvasRef
+        canvasRef,
+        divideLineRef
       }
     },
   })
 </script>
 
 <style scoped lang="scss">
+  .canvas-table-wrapper {
+    position: relative;
+    .divide-line {
+      position: absolute;
+      left: 200px;
+      top: 0;
+      width: 1px;
+      background-color: blue;
+    }
+  }
 </style>
