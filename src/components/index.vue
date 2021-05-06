@@ -5,27 +5,30 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, onMounted, PropType, ref, toRefs } from "vue"
+  import { defineComponent, onMounted, PropType, ref, Ref, toRefs } from "vue"
   import { setCanvas, setColumns, setData, setTotalHeight } from '../core/store'
   import { init } from '../core/init'
   import { paint } from '../core/paint'
   import { flatData } from '../utils'
   import config from "../config"
   import { Column, $columns } from '../types'
-  import { paintHeader } from "../utils/paint"
   import { setTotalWidth, singleData } from '../core/store'
 
   export default defineComponent({
     props: {
-      columns: Array as PropType<Column[]>,
+      columns: {
+        type: Array as PropType<Column[]>,
+        default: () => []
+      },
       data: {
         type: Array,
         default: () => []
       }
     },
     setup(props) {
+      const canvasRef = ref<HTMLCanvasElement | null>(null)
+
       let { rowHeight, headerHeight } = config
-      const canvasRef = ref(null)
       let { columns, data } = toRefs(props)
       let _columns: $columns[] = flatData(columns)
       let lastColumn: $columns = _columns[_columns.length - 1]
@@ -44,7 +47,7 @@
       setTotalHeight(totalHeight)
 
       onMounted(() => {
-        setCanvas(canvasRef)
+        setCanvas(canvasRef as Ref<HTMLCanvasElement>)
         init()
         paint()
       })
