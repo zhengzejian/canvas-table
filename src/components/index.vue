@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, onMounted, PropType, ref, Ref, toRefs } from "vue"
+  import { defineComponent, onMounted, PropType, ref, Ref, toRefs, watch } from "vue"
   import { setCanvas, setColumns, setData, setTotalHeight } from '../core/store'
   import { init } from '../core/init'
   import { paint } from '../core/paint'
@@ -15,6 +15,7 @@
   import config from "../config"
   import { Column, $columns } from '../types'
   import { setTotalWidth, singleData } from '../core/store'
+  import { useCanvasPosition } from '../hooks/useCanvasPosition'
 
   export default defineComponent({
     props: {
@@ -52,6 +53,11 @@
         setCanvas(canvasRef as Ref<HTMLCanvasElement>)
         init()
         paint()
+
+        let { x, y } = useCanvasPosition()
+        watch([x, y], (...args) => console.log(args))
+
+
       })
 
       return {

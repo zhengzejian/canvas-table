@@ -5,3 +5,5 @@ export interface Column {
 }
 
 export type $columns = Column & { x: number }
+
+export type Fn = () => void
