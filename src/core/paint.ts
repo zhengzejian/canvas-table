@@ -1,22 +1,22 @@
-import { state } from '../core/store'
 import config from '../config'
 import { textOverflow } from '../utils'
+import { State } from '../types'
 
-export function paint(): void {
-    let { $data } = state
-    paintHeader()
-    if ($data.length) {
-        paintBody()
+export function paint(state: State): void {
+    let { unionData } = state
+    paintHeader(state)
+    if (unionData.length) {
+        paintBody(state)
     }
 
 }
 
 // draw header
-function paintHeader(): void {
+function paintHeader(state: State): void {
 
     let { width, headerHeight, headerColor, cellPaddingWidth, font, lineColor } = config
     let canvasCtx = state.canvasCtx as CanvasRenderingContext2D
-    let { totalWidth, $columns } = state
+    let { totalWidth, unionColumn } = state
     let canvasWidth = totalWidth > width ? width : totalWidth
 
     canvasCtx.beginPath()
@@ -27,10 +27,10 @@ function paintHeader(): void {
     canvasCtx.strokeStyle = lineColor
     canvasCtx.strokeRect(0.5, 0.5, canvasWidth, headerHeight)
 
-    $columns.forEach(column => {
+    unionColumn.forEach(column => {
         let { x, label, width } = column
         let textY = (13 + headerHeight) / 2
-        let text = textOverflow(label, width).text
+        let text = textOverflow(state, label, width).text
         canvasCtx.beginPath()
         canvasCtx.lineWidth = 1
         canvasCtx.strokeStyle = lineColor
@@ -45,19 +45,19 @@ function paintHeader(): void {
     })
 }
 
-function paintBody(): void {
+function paintBody(state: State): void {
     let canvasCtx = state.canvasCtx as CanvasRenderingContext2D
-    let { $data, $columns, totalWidth, totalHeight } = state
+    let { unionData, unionColumn, totalWidth, totalHeight } = state
     let { rowHeight, headerHeight, height, lineColor, font, cellPaddingWidth } = config
     let bodyHeight: number = height - headerHeight
-    let dataHeight: number = $data.length * rowHeight
+    let dataHeight: number = unionData.length * rowHeight
     let actualHeight: number = dataHeight > bodyHeight ? bodyHeight : dataHeight
 
     canvasCtx.beginPath()
     canvasCtx.strokeStyle = lineColor
     canvasCtx.strokeRect(0 + 0.5, headerHeight, totalWidth, actualHeight - 0.5)
 
-    $data.forEach((item, i) => {
+    unionData.forEach((item, i) => {
         canvasCtx.beginPath()
         canvasCtx.strokeStyle = lineColor
         canvasCtx.moveTo(0, item.y)
@@ -65,9 +65,9 @@ function paintBody(): void {
         canvasCtx.stroke()
 
 
-        $columns.forEach(column => {
+        unionColumn.forEach(column => {
             let { key, x } = column
-            let text = textOverflow(item[key], column.width).text
+            let { text } = textOverflow(state, item[key], column.width)
             // draw vertical line
             canvasCtx.beginPath()
             canvasCtx.strokeStyle = lineColor

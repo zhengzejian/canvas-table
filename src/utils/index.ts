@@ -1,22 +1,15 @@
 import { Ref } from 'vue'
-import { state } from '../core/store'
 import config from '../config'
-import { Column, $columns } from '../types'
-
-interface textOverflowData {
-    textWidth: number;
-    isOverflow: boolean;
-    text: string;
-}
+import { Column, UnionColumn, State, TextOverflowData } from '../types'
 
 let chineseReg: RegExp = /\u4e00-\u9fa5|%/
 
 let numWidth: number = 0
 let threePointWidth: number = 0
 
-export function flatData(columns: Ref<Column[]>): $columns[] {
+export function flatData(columns: Ref<Column[]>): UnionColumn[] {
 
-    let data: $columns[] = JSON.parse(JSON.stringify(columns.value))
+    let data: UnionColumn[] = JSON.parse(JSON.stringify(columns.value))
     data.reduce((pre, cur) => {
         cur.x = pre
         return pre + cur.width
@@ -24,12 +17,12 @@ export function flatData(columns: Ref<Column[]>): $columns[] {
     return data
 }
 
-export function textOverflow(text: string, width: number): textOverflowData {
+export function textOverflow(state: State, text: string, width: number): TextOverflowData {
     let { fontSize, cellPaddingWidth } = config
     let canvasCtx = state.canvasCtx as CanvasRenderingContext2D
     typeof text !== 'string' && (text = text + '')
     let textWidth = canvasCtx.measureText(text).width
-    let texData: textOverflowData = {
+    let texData: TextOverflowData = {
         textWidth: textWidth,
         isOverflow: false,
         text: text
