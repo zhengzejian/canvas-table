@@ -4,7 +4,7 @@ export interface State {
     canvasCtx: CanvasRenderingContext2D | null;
     columns: Column[];
     unionColumn: UnionColumn[];
-    unionData: singleData[],
+    unionData: SingleData[],
     totalWidth: number;
     totalHeight: number;
 }

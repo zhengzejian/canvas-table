@@ -2,7 +2,18 @@ import config from '../config'
 import { textOverflow } from '../utils'
 import { State } from '../types'
 
-export function paint(state: State): void {
+export function initCanvas(canvasEle: HTMLCanvasElement, canvasCtx: CanvasRenderingContext2D): void {
+    let devicePixelRatio = window.devicePixelRatio
+    let { width, height } = config
+
+    canvasEle.width = width * devicePixelRatio
+    canvasEle.height = height * devicePixelRatio
+    canvasEle.style.width = `${width}px`
+    canvasEle.style.height = `${height}px`
+    canvasCtx.scale(devicePixelRatio, devicePixelRatio)
+}
+
+export function paintCanvas(state: State): void {
     let { unionData } = state
     paintHeader(state)
     if (unionData.length) {

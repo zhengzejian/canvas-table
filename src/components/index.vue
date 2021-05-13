@@ -7,12 +7,12 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, reactive, onMounted, PropType, ref, Ref, toRefs, watch } from "vue"
-  import { init } from '../core/init'
-  import { paint } from '../core/paint'
-  import { flatData } from '../utils'
-  import config from "../config"
-  import { State, Column, UnionColumn, SingleData, Fn, TAnyFunction } from '../types'
+  import { defineComponent, reactive, onMounted, PropType, ref, toRefs, watch } from "vue"
+  import { formatData } from '../core/data'
+  import { initCanvas, paintCanvas } from '../core/canvas'
+  import { addDivideLineEvent, handleShowDivideLine } from '../core/divideLine'
+  import { debounce } from '../utils'
+  import { State, Column } from '../types'
   import { usePosition } from '../hooks/usePosition'
 
   let state = reactive<State>({
@@ -41,25 +41,13 @@
       const canvasRef = ref<HTMLCanvasElement | null>(null)
       const divideLineRef = ref<HTMLDivElement | null>(null)
 
-      let { rowHeight, headerHeight, lineColor } = config
       let { columns, data } = toRefs(props)
-      let unionColumn: UnionColumn[] = flatData(columns)
-      let lastColumn: UnionColumn = unionColumn[unionColumn.length - 1]
-      let totalWidth: number = lastColumn.x + lastColumn.width
-
-      let cloneData: SingleData[] = JSON.parse(JSON.stringify(data.value))
-      let totalHeight = cloneData.reduce((pre, cur, index): number => {
-        let y = index ? pre + rowHeight : headerHeight + rowHeight
-        cur.y = y
-        return y
-      }, 0)
+      let { unionColumn, cloneData, totalWidth, totalHeight } = formatData(columns, data)
 
       state.unionColumn = unionColumn
       state.unionData = cloneData
       state.totalWidth = totalWidth
       state.totalHeight = totalHeight
-
-
 
       onMounted(() => {
         let canvasEle = canvasRef.value as HTMLCanvasElement
@@ -68,57 +56,20 @@
         state.canvasEle = canvasEle
         state.canvasCtx = canvasCtx
 
-        init(canvasEle, canvasCtx)
-        paint(state)
+        initCanvas(canvasEle, canvasCtx)
+        paintCanvas(state)
 
-        divideLineEle.addEventListener('mousedown', function (e: MouseEvent) {
-          this.style.height = `${totalHeight}px`
-          this.style.backgroundColor = `${lineColor}`
-          this.style.display = 'block'
-        })
-        divideLineEle.addEventListener('mouseup', function (e: MouseEvent) {
-          this.style.backgroundColor = `transparent`
-          this.style.display = 'none'
-        })
-
+        addDivideLineEvent(divideLineEle, totalHeight)
         let { x, y } = usePosition(state.canvasEle as HTMLCanvasElement)
-        let fn = (positionArr: number[]): void => {
-          let [x, y] = positionArr
-          let { unionColumn } = state
-          let { headerHeight } = config
-          let rangeArr = unionColumn.map(item => item.x + item.width)
-          const DIS = 2
-          for (let i = 0, j = rangeArr.length; i < j; i++) {
-            if (y <= headerHeight && (x > (rangeArr[i] - DIS) && x < (rangeArr[i] + DIS))) {
-              divideLineEle.style.left = `${rangeArr[i] - 1}px`
-              // divideLineEle.style.height = `${totalHeight}px`
-              divideLineEle.style.display = 'block'
-              break
-            } else {
-              divideLineEle.style.display = 'none'
-            }
-          }
-        }
-
-        let debounce = (fn: TAnyFunction, delay: number = 16.7): Fn => {
-          let timer: number = 0
-          return function handler(...args) {
-            if (timer) clearTimeout(timer)
-            timer = window.setTimeout(() => {
-              fn.apply(this, args)
-            }, delay)
-          }
-        }
-        watch([x, y], debounce(fn))
+        watch([x, y], debounce(handleShowDivideLine(divideLineEle, state)))
 
       })
-
 
       return {
         canvasRef,
         divideLineRef
       }
-    },
+    }
   })
 </script>
 

@@ -1,6 +1,6 @@
 import { Ref } from 'vue'
 import config from '../config'
-import { Column, UnionColumn, State, TextOverflowData } from '../types'
+import { Column, UnionColumn, State, TextOverflowData, TAnyFunction, Fn } from '../types'
 
 let chineseReg: RegExp = /\u4e00-\u9fa5|%/
 
@@ -8,7 +8,6 @@ let numWidth: number = 0
 let threePointWidth: number = 0
 
 export function flatData(columns: Ref<Column[]>): UnionColumn[] {
-
     let data: UnionColumn[] = JSON.parse(JSON.stringify(columns.value))
     data.reduce((pre, cur) => {
         cur.x = pre
@@ -55,4 +54,14 @@ export function textOverflow(state: State, text: string, width: number): TextOve
     texData.text = showText
     texData.isOverflow = true
     return texData
+}
+
+export function debounce(fn: TAnyFunction, delay: number = 16.7): Fn {
+    let timer: number = 0
+    return function handler(...args) {
+        if (timer) clearTimeout(timer)
+        timer = window.setTimeout(() => {
+            fn.apply(this, args)
+        }, delay)
+    }
 }
