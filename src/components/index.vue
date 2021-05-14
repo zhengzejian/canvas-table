@@ -59,7 +59,7 @@
         initCanvas(canvasEle, canvasCtx)
         paintCanvas(state)
 
-        addDivideLineEvent(divideLineEle, totalHeight)
+        addDivideLineEvent(divideLineEle, state)
         let { x, y } = usePosition(state.canvasEle as HTMLCanvasElement)
         watch([x, y], debounce(handleShowDivideLine(divideLineEle, state)))
 
