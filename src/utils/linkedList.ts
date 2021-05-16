@@ -1,17 +1,17 @@
+import { UnionColumn } from '../types'
+type TNodeFunction<T> = (node: Node<T>) => void
+type TNodeCompare<T> = (node: Node<T>) => boolean
 
-type TNodeFunction = (node: Node) => void
-type TNodeCompare = (node: Node) => boolean
-
-class Node {
-    public data: any;
-    public prev: Node | null;
-    public next: Node | null;
-    constructor(data: any) {
+export class Node<T> {
+    public data: T;
+    public prev: Node<T> | null;
+    public next: Node<T> | null;
+    constructor(data: T) {
         this.prev = null
         this.next = null
         this.data = data
     }
-    after(fn: TNodeFunction) {
+    after(fn: TNodeFunction<T>) {
         let node = this.next
         while (node) {
             fn(node)
@@ -20,16 +20,16 @@ class Node {
     }
 }
 
-export default class DoublyLinkedList {
-    public head: Node | null;
-    public tail: Node | null;
+export default class DoublyLinkedList<T> {
+    public head: Node<T> | null;
+    public tail: Node<T> | null;
     constructor() {
         this.head = null
         this.tail = null
     }
     // 在链表尾部添加一个新节点
     add(item: any) {
-        let node = new Node(item)
+        let node = new Node<T>(item)
         if (!this.head) {
             this.head = node
             this.tail = node
@@ -41,7 +41,7 @@ export default class DoublyLinkedList {
     }
     // 在链表指定位置添加节点
     addAt(index: number, item: any) {
-        let node = new Node(item)
+        let node = new Node<T>(item)
         let counter = 1
         let current = this.head
         if (!index) {
@@ -117,7 +117,7 @@ export default class DoublyLinkedList {
         return counter
     }
     // 遍历链表
-    traverse(fn: TNodeFunction) {
+    traverse(fn: TNodeFunction<T>) {
         let current = this.head
         while (current) {
             // 执行回调
@@ -125,7 +125,15 @@ export default class DoublyLinkedList {
             current = current.next
         }
     }
-    findIndex(compare: TNodeCompare) {
+    find(fn: TNodeCompare<T>): Node<T> | undefined {
+        let current = this.head
+        while (current) {
+            if (fn(current)) return current
+            current = current.next
+        }
+        return undefined
+    }
+    findIndex(compare: TNodeCompare<T>): number {
         let current = this.head
         let counter = 0
         while (current) {

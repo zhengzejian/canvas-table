@@ -7,13 +7,19 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, reactive, onMounted, PropType, ref, toRefs, watch } from "vue"
+  import { defineComponent, reactive, onMounted, PropType, ref, toRefs, watch, computed } from "vue"
   import { formatData } from '../core/data'
   import { initCanvas, paintCanvas } from '../core/canvas'
   import { addDivideLineEvent, handleShowDivideLine } from '../core/divideLine'
   import { debounce } from '../utils'
-  import { State, Column } from '../types'
+  import { State, Column, UnionColumn } from '../types'
   import { usePosition } from '../hooks/usePosition'
+  import DoublyLinkedList from '../utils/linkedList'
+
+  let aa = computed(() => 1)
+  console.log('aa: ', aa.value)
+  let bb = reactive({ aa: aa })
+  console.log("bb: ", bb.aa.value)
 
   let state = reactive<State>({
     canvasEle: null,
@@ -22,9 +28,10 @@
     unionColumn: [],
     unionData: [],
     totalWidth: 0,
-    totalHeight: 0
+    totalHeight: 0,
+    columnLinkList: null
   })
-
+  // state.columnLinkList
   export default defineComponent({
     props: {
       columns: {
@@ -41,13 +48,40 @@
       const canvasRef = ref<HTMLCanvasElement | null>(null)
       const divideLineRef = ref<HTMLDivElement | null>(null)
 
-      let { columns, data } = toRefs(props)
-      let { unionColumn, cloneData, totalWidth, totalHeight } = formatData(columns, data)
 
-      state.unionColumn = unionColumn
-      state.unionData = cloneData
-      state.totalWidth = totalWidth
-      state.totalHeight = totalHeight
+      let columnLinkList = new DoublyLinkedList<UnionColumn>()
+      let { columns, data } = toRefs(props)
+
+      columns.value.forEach(column => columnLinkList.add(column))
+      columnLinkList.traverse(node => {
+        node.data.width = ref(node.data.width)
+        node.data.xLeft = computed(() => {
+          if (!node.prev) return 0
+          let { xLeft, width } = node.prev.data
+          return xLeft.value + width.value
+        })
+        node.data.xRight = computed(() => {
+          let { xLeft, width } = node.data
+          return xLeft.value + width.value
+        })
+      })
+
+      // columns.value.forEach(item => {
+      //   item.x = computed()
+      //   let column: UnionColumn = item
+      //   console.log(column)
+      // })
+
+
+      // let { unionColumn, cloneData, totalWidth, totalHeight } = formatData(columns, data)
+      // let columnLinkList = new DoublyLinkedList<UnionColumn>()
+      // unionColumn.forEach(column => columnLinkList.add(column))
+      console.log('columnLinkListcolumnLinkListcolumnLinkList: ', columnLinkList)
+      state.columnLinkList = columnLinkList
+      // state.unionColumn = unionColumn
+      // state.unionData = cloneData
+      // state.totalWidth = totalWidth
+      // state.totalHeight = totalHeight
 
       onMounted(() => {
         let canvasEle = canvasRef.value as HTMLCanvasElement
@@ -57,7 +91,15 @@
         state.canvasCtx = canvasCtx
 
         initCanvas(canvasEle, canvasCtx)
-        paintCanvas(state)
+        // paintCanvas(state)
+        watch(state.columnLinkList, () => {
+          // let { unionColumn, cloneData, totalWidth, totalHeight } = formatData(columns, data)
+          // let columnLinkList = new DoublyLinkedList<UnionColumn>()
+          // unionColumn.forEach(column => columnLinkList.add(column))
+          // state.columnLinkList = columnLinkList
+          // state.totalWidth = totalWidth
+          paintCanvas(state)
+        }, { immediate: true })
 
         addDivideLineEvent(divideLineEle, state)
         let { x, y } = usePosition(state.canvasEle as HTMLCanvasElement)

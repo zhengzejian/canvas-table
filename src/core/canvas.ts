@@ -14,6 +14,8 @@ export function initCanvas(canvasEle: HTMLCanvasElement, canvasCtx: CanvasRender
 }
 
 export function paintCanvas(state: State): void {
+    state.canvasCtx!.beginPath()
+    state.canvasCtx!.clearRect(-1, -1, 2000, 2000)
     let { unionData } = state
     paintHeader(state)
     if (unionData.length) {
@@ -27,7 +29,7 @@ function paintHeader(state: State): void {
 
     let { width, headerHeight, headerColor, cellPaddingWidth, font, lineColor } = config
     let canvasCtx = state.canvasCtx as CanvasRenderingContext2D
-    let { totalWidth, unionColumn } = state
+    let { totalWidth, columnLinkList } = state
     let canvasWidth = totalWidth > width ? width : totalWidth
 
     canvasCtx.beginPath()
@@ -38,8 +40,9 @@ function paintHeader(state: State): void {
     canvasCtx.strokeStyle = lineColor
     canvasCtx.strokeRect(0.5, 0.5, canvasWidth, headerHeight)
 
-    unionColumn.forEach(column => {
-        let { x, label, width } = column
+    columnLinkList.traverse(node => {
+        console.log('node: ', node)
+        let { x, label, width } = node.data
         let textY = (13 + headerHeight) / 2
         let text = textOverflow(state, label, width).text
         canvasCtx.beginPath()
@@ -58,7 +61,7 @@ function paintHeader(state: State): void {
 
 function paintBody(state: State): void {
     let canvasCtx = state.canvasCtx as CanvasRenderingContext2D
-    let { unionData, unionColumn, totalWidth, totalHeight } = state
+    let { unionData, columnLinkList, totalWidth, totalHeight } = state
     let { rowHeight, headerHeight, height, lineColor, font, cellPaddingWidth } = config
     let bodyHeight: number = height - headerHeight
     let dataHeight: number = unionData.length * rowHeight
@@ -76,14 +79,14 @@ function paintBody(state: State): void {
         canvasCtx.stroke()
 
 
-        unionColumn.forEach(column => {
-            let { key, x } = column
-            let { text } = textOverflow(state, item[key], column.width)
+        columnLinkList.traverse(node => {
+            let { key, x, width } = node.data
+            let { text } = textOverflow(state, item[key], width)
             // draw vertical line
             canvasCtx.beginPath()
             canvasCtx.strokeStyle = lineColor
-            canvasCtx.moveTo(column.x, 0)
-            canvasCtx.lineTo(column.x, totalHeight)
+            canvasCtx.moveTo(x, 0)
+            canvasCtx.lineTo(x, totalHeight)
             canvasCtx.stroke()
             // draw text
             canvasCtx.beginPath()
