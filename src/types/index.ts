@@ -18,19 +18,23 @@ export type SingleData = {
 export type UnionColumn = {
     label: string;
     key: string;
-    xLeft: ComputedRef<number>;
-    xRight: ComputedRef<number>;
-    width: Ref<number>;
+    xLeft: number; // ComputedRef<number>;
+    xRight: number; // ComputedRef<number>;
+    width: number; // Ref<number>;
 }
 
 export type UnionColumnNode = Node<UnionColumn>
+export type WrapperPosition = {
+    left: number;
+    top: number;
+}
 export interface State {
     canvasEle: HTMLCanvasElement | null;
     canvasCtx: CanvasRenderingContext2D | null;
+    wrapperPosition: WrapperPosition;
     columns: Column[];
     unionColumn: UnionColumn[];
     unionData: SingleData[],
-    totalWidth: number;
     totalHeight: number;
     columnLinkList: DoublyLinkedList<UnionColumn>
 }

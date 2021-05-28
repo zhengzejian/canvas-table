@@ -1,5 +1,6 @@
 <template>
-  <div class="canvas-table-wrapper">
+  <div class="canvas-table-wrapper"
+       ref="wrapperRef">
     <canvas ref="canvasRef"></canvas>
     <div class="divide-line"
          ref="divideLineRef"></div>
@@ -16,22 +17,20 @@
   import { usePosition } from '../hooks/usePosition'
   import DoublyLinkedList from '../utils/linkedList'
 
-  let aa = computed(() => 1)
-  console.log('aa: ', aa.value)
-  let bb = reactive({ aa: aa })
-  console.log("bb: ", bb.aa.value)
-
   let state = reactive<State>({
     canvasEle: null,
     canvasCtx: null,
+    wrapperPosition: {
+      left: 0,
+      top: 0
+    },
     columns: [],
     unionColumn: [],
     unionData: [],
-    totalWidth: 0,
     totalHeight: 0,
-    columnLinkList: null
+    columnLinkList: new DoublyLinkedList<UnionColumn>()
   })
-  // state.columnLinkList
+
   export default defineComponent({
     props: {
       columns: {
@@ -44,46 +43,31 @@
       }
     },
     setup(props) {
-
+      const wrapperRef = ref<HTMLDivElement | null>(null)
       const canvasRef = ref<HTMLCanvasElement | null>(null)
       const divideLineRef = ref<HTMLDivElement | null>(null)
 
-
-      let columnLinkList = new DoublyLinkedList<UnionColumn>()
       let { columns, data } = toRefs(props)
 
-      columns.value.forEach(column => columnLinkList.add(column))
-      columnLinkList.traverse(node => {
-        node.data.width = ref(node.data.width)
-        node.data.xLeft = computed(() => {
-          if (!node.prev) return 0
-          let { xLeft, width } = node.prev.data
-          return xLeft.value + width.value
-        })
-        node.data.xRight = computed(() => {
-          let { xLeft, width } = node.data
-          return xLeft.value + width.value
-        })
+      columns.value.forEach(column => state.columnLinkList.add(column))
+      state.columnLinkList.traverse(node => {
+        let { width } = node.data
+        node.data.xLeft = node.prev ? node.prev.data.xRight : 0
+        node.data.xRight = (node.prev ? node.prev.data.xRight : 0) + node.data.width
       })
 
-      // columns.value.forEach(item => {
-      //   item.x = computed()
-      //   let column: UnionColumn = item
-      //   console.log(column)
-      // })
 
-
-      // let { unionColumn, cloneData, totalWidth, totalHeight } = formatData(columns, data)
-      // let columnLinkList = new DoublyLinkedList<UnionColumn>()
-      // unionColumn.forEach(column => columnLinkList.add(column))
-      console.log('columnLinkListcolumnLinkListcolumnLinkList: ', columnLinkList)
-      state.columnLinkList = columnLinkList
-      // state.unionColumn = unionColumn
-      // state.unionData = cloneData
-      // state.totalWidth = totalWidth
-      // state.totalHeight = totalHeight
+      let { unionColumn, cloneData, totalWidth, totalHeight } = formatData(columns, data)
+      state.unionData = cloneData
+      state.totalHeight = totalHeight
 
       onMounted(() => {
+        let wrapperEle = wrapperRef.value as HTMLDivElement
+        let { left, top } = wrapperEle.getBoundingClientRect()
+        state.wrapperPosition = {
+          left,
+          top
+        }
         let canvasEle = canvasRef.value as HTMLCanvasElement
         let canvasCtx = canvasEle.getContext('2d') as CanvasRenderingContext2D
         let divideLineEle = divideLineRef.value as HTMLDivElement
@@ -91,7 +75,6 @@
         state.canvasCtx = canvasCtx
 
         initCanvas(canvasEle, canvasCtx)
-        // paintCanvas(state)
         watch(state.columnLinkList, () => {
           // let { unionColumn, cloneData, totalWidth, totalHeight } = formatData(columns, data)
           // let columnLinkList = new DoublyLinkedList<UnionColumn>()
@@ -108,6 +91,7 @@
       })
 
       return {
+        wrapperRef,
         canvasRef,
         divideLineRef
       }

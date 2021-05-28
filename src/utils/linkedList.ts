@@ -15,7 +15,7 @@ export class Node<T> {
         let node = this.next
         while (node) {
             fn(node)
-            node = this.next
+            node = node.next
         }
     }
 }

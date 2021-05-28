@@ -3,26 +3,24 @@ import { TAnyFunction, State, UnionColumnNode } from '../types'
 
 let isDivideLineDragging: boolean = false
 let activeNode: UnionColumnNode
-let minX = 0
+let minX = 0, translateX = 0, isMoved = false
 
 export function addDivideLineEvent(el: HTMLElement, state: State): void {
-    let { totalHeight, unionColumn } = state
+    let { totalHeight, wrapperPosition } = state
     let { lineColor } = config
+    let { left: wrapperLeft } = wrapperPosition
     let divideLineMove = (e: MouseEvent) => {
+        isMoved = true
         let { clientX } = e
-        console.log('offsetX: ', clientX, e.target)
-        let { x, width } = activeNode.data
-        // let currentX = x + width
-        let translateX = clientX < minX + 28 ? minX + 28 : clientX
-        // console.log('translateX: ', translateX)
+        let offsetX = clientX - wrapperLeft
+        translateX = offsetX < minX ? minX : offsetX
         el.style.left = `${translateX}px`
-        activeNode.data.width = translateX - x
+
     }
-    el.addEventListener('mousedown', () => {
-        console.log('activeNode: ', activeNode)
+    el.addEventListener('mousedown', (e: MouseEvent) => {
         isDivideLineDragging = true
-        let { x, width } = activeNode.prev!.data
-        minX = width + x
+        let { xLeft, width } = activeNode.data
+        minX = xLeft + 30
         el.style.height = `${totalHeight}px`
         el.style.backgroundColor = `${lineColor}`
         document.addEventListener('mousemove', divideLineMove)
@@ -31,6 +29,20 @@ export function addDivideLineEvent(el: HTMLElement, state: State): void {
         isDivideLineDragging = false
         el.style.backgroundColor = `transparent`
         el.style.display = 'none'
+        if (isMoved) {
+            console.log('translateX: ', translateX)
+            let { xLeft } = activeNode.data
+            activeNode.data.width = translateX - xLeft
+            activeNode.data.xRight = translateX
+            activeNode.after(node => {
+                let { xRight } = node.prev!.data
+                node.data.xLeft = xRight
+                node.data.xRight = xRight + node.data.width
+                console.log(node)
+            })
+            console.log('state: ', state)
+            isMoved = false
+        }
         document.removeEventListener('mousemove', divideLineMove)
     })
 }
@@ -38,7 +50,7 @@ export function addDivideLineEvent(el: HTMLElement, state: State): void {
 type Coordinate = [number, number]
 
 export function handleShowDivideLine(el: HTMLElement, state: State): TAnyFunction {
-    let { unionColumn, columnLinkList } = state
+    let { columnLinkList } = state
     return function (coordinate: Coordinate): void {
         let [x, y] = coordinate
         let { headerHeight } = config
@@ -51,36 +63,16 @@ export function handleShowDivideLine(el: HTMLElement, state: State): TAnyFunctio
         }
 
         const DIS = 2
-        let offsetX = 0
         let node = columnLinkList.find((node) => {
-            let { x: columnX, width } = node.data
-            offsetX = columnX + width
-            return x > offsetX - DIS && x < offsetX + DIS
+            let { xRight } = node.data
+            return x > xRight - DIS && x < xRight + DIS
         })
         if (node !== undefined) {
             activeNode = node
-            el.style.left = `${offsetX - 1}px`
+            el.style.left = `${node.data.xRight - 1}px`
             el.style.display = 'block'
         } else if (!isHide) {
             el.style.display = 'none'
         }
-
-
-
-
-
-
-        // let rangeArr = unionColumn.map(item => item.x + item.width)
-        // for (let i = 0, j = rangeArr.length; i < j; i++) {
-        //     if (y <= headerHeight && (x > (rangeArr[i] - DIS) && x < (rangeArr[i] + DIS))) {
-        //         el.style.left = `${rangeArr[i] - 1}px`
-        //         el.style.display = 'block'
-        //         break
-        //     } else {
-        //         el.style.display = 'none'
-        //     }
-        // }
     }
-
-
 }
