@@ -2,6 +2,8 @@
   <div class="canvas-table-wrapper"
        ref="wrapperRef">
     <canvas ref="canvasRef"></canvas>
+    <div class="scroll-bar-y"
+         ref="scrollBarYRef"></div>
     <div class="divide-line"
          ref="divideLineRef"></div>
   </div>
@@ -12,6 +14,7 @@
   import { formatData } from '../core/data'
   import { initCanvas, paintCanvas } from '../core/canvas'
   import { addDivideLineEvent, handleShowDivideLine } from '../core/divideLine'
+  import { addScrollBarEvent } from '../core/scrollBar'
   import { debounce } from '../utils'
   import { State, Column, UnionColumn } from '../types'
   import { usePosition } from '../hooks/usePosition'
@@ -46,6 +49,7 @@
       const wrapperRef = ref<HTMLDivElement | null>(null)
       const canvasRef = ref<HTMLCanvasElement | null>(null)
       const divideLineRef = ref<HTMLDivElement | null>(null)
+      const scrollBarYRef = ref<HTMLDivElement | null>(null)
 
       let { columns, data } = toRefs(props)
 
@@ -71,16 +75,12 @@
         let canvasEle = canvasRef.value as HTMLCanvasElement
         let canvasCtx = canvasEle.getContext('2d') as CanvasRenderingContext2D
         let divideLineEle = divideLineRef.value as HTMLDivElement
+        let scrollBarYEle = scrollBarYRef.value as HTMLDivElement
         state.canvasEle = canvasEle
         state.canvasCtx = canvasCtx
 
         initCanvas(canvasEle, canvasCtx)
-        watch(state.columnLinkList, () => {
-          // let { unionColumn, cloneData, totalWidth, totalHeight } = formatData(columns, data)
-          // let columnLinkList = new DoublyLinkedList<UnionColumn>()
-          // unionColumn.forEach(column => columnLinkList.add(column))
-          // state.columnLinkList = columnLinkList
-          // state.totalWidth = totalWidth
+        watch(state.columnLinkList, (val) => {
           paintCanvas(state)
         }, { immediate: true })
 
@@ -88,12 +88,14 @@
         let { x, y } = usePosition(state.canvasEle as HTMLCanvasElement)
         watch([x, y], debounce(handleShowDivideLine(divideLineEle, state)))
 
+        addScrollBarEvent(scrollBarYEle, state)
       })
 
       return {
         wrapperRef,
         canvasRef,
-        divideLineRef
+        divideLineRef,
+        scrollBarYRef
       }
     }
   })
@@ -102,6 +104,16 @@
 <style scoped lang="scss">
   .canvas-table-wrapper {
     position: relative;
+    .scroll-bar-y {
+      display: none;
+      position: absolute;
+      right: 0;
+      height: 50px;
+      width: 10px;
+      border-radius: 5px;
+      background-color: rgba(0, 0, 255, 0.3);
+      top: 0;
+    }
     .divide-line {
       position: absolute;
       height: 28px;
